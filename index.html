@@ -281,10 +281,12 @@ select option{background:var(--s2)}
   <div class="modal">
     <div class="modal-title" id="modalTitle">ENTRADA</div>
     <div class="modal-sub" id="modalSub">Registrar llegada de producto</div>
-    <div class="fg" style="position:relative">
+    <div class="fg">
       <label>Producto *</label>
-      <input id="fNombre" type="text" placeholder="Escribe o selecciona producto..." oninput="onNombreInput()" autocomplete="off" onfocus="showSuggestions()">
-      <div id="suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--s3);border:1px solid var(--gold);border-radius:9px;z-index:999;max-height:220px;overflow-y:auto;margin-top:4px"></div>
+      <select id="fProductoSelect" onchange="onProductoSelect()" style="margin-bottom:8px">
+        <option value="">— Selecciona producto —</option>
+      </select>
+      <input id="fNombre" type="text" placeholder="O escribe nombre personalizado..." oninput="onNombreInput()" autocomplete="off" style="margin-top:0">
     </div>
     <div class="fr2">
       <div class="fg"><label>Código SAP</label><input id="fSap" type="text" placeholder="1000000780"></div>
@@ -493,8 +495,10 @@ function openModal(tipo){
   ['fNombre','fSap','fBodega','fCantidad','fVenc','fResp','fNota'].forEach(id=>{
     const el=document.getElementById(id); if(el&&el.tagName==='SELECT')el.value=''; else if(el)el.value='';
   });
+  const sel=document.getElementById('fProductoSelect'); if(sel) sel.value='';
   document.getElementById('overlay').classList.add('open');
-  setTimeout(()=>document.getElementById('fNombre').focus(),100);
+  buildProductoSelect();
+  setTimeout(()=>document.getElementById('fProductoSelect').focus(),100);
 }
 
 function closeModal(){document.getElementById('overlay').classList.remove('open');}
@@ -523,53 +527,34 @@ const CATALOGO = [
   { nombre: 'Honey Syrup', sap: '1000000602' },
 ];
 
-function showSuggestions() {
-  const val = document.getElementById('fNombre').value.toLowerCase();
-  renderSuggestions(val);
+function buildProductoSelect() {
+  const sel = document.getElementById('fProductoSelect');
+  if (!sel) return;
+  // Combinar catálogo + inventario existente
+  const invItems = (allData.inventario||[]).map(p=>({nombre:p['Nombre']||'',sap:p['SAP']||''}));
+  const all = [...CATALOGO];
+  invItems.forEach(i=>{ if(!all.find(c=>c.sap===i.sap)) all.push(i); });
+  all.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  sel.innerHTML = '<option value="">— Selecciona producto —</option>' +
+    all.map(p=>`<option value="${p.sap}" data-nombre="${p.nombre}">${p.nombre} (${p.sap})</option>`).join('');
 }
 
-function onNombreInput() {
-  const val = document.getElementById('fNombre').value.trim().toLowerCase();
-  renderSuggestions(val);
-  // Auto-fill SAP si match exacto
-  const exact = CATALOGO.find(p => p.nombre.toLowerCase() === val);
-  if (exact) document.getElementById('fSap').value = exact.sap;
-  // También buscar en inventario cargado
-  const inv = (allData.inventario||[]).find(p => String(p['Nombre']||'').toLowerCase() === val);
-  if (inv && !document.getElementById('fSap').value) document.getElementById('fSap').value = inv['SAP']||'';
-}
-
-function renderSuggestions(val) {
-  const box = document.getElementById('suggestions');
-  // Combinar catálogo + productos ya en inventario
-  const invItems = (allData.inventario||[]).map(p => ({ nombre: p['Nombre']||'', sap: p['SAP']||'' }));
-  const all = [...CATALOGO, ...invItems.filter(i => !CATALOGO.find(c => c.sap === i.sap))];
-  const filtered = val ? all.filter(p => p.nombre.toLowerCase().includes(val)) : all;
-  if (!filtered.length) { box.style.display='none'; return; }
-  box.style.display = 'block';
-  box.innerHTML = filtered.map(p => `
-    <div onclick="selectProduct('${p.nombre.replace(/'/g,"\\'")}','${p.sap}')"
-      style="padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);transition:background .1s"
-      onmouseover="this.style.background='var(--gold-dim)'" onmouseout="this.style.background=''">
-      <span style="font-weight:500">${p.nombre}</span>
-      <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${p.sap}</span>
-    </div>`).join('');
-}
-
-function selectProduct(nombre, sap) {
-  document.getElementById('fNombre').value = nombre;
-  document.getElementById('fSap').value = sap;
-  document.getElementById('suggestions').style.display = 'none';
+function onProductoSelect() {
+  const sel = document.getElementById('fProductoSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt.value) return;
+  document.getElementById('fNombre').value = opt.getAttribute('data-nombre');
+  document.getElementById('fSap').value = opt.value;
   if (mType === 'salida') onBodegaChange();
 }
 
-// Cerrar sugerencias al click fuera
-document.addEventListener('click', e => {
-  if (!e.target.closest('#fNombre') && !e.target.closest('#suggestions')) {
-    const s = document.getElementById('suggestions');
-    if (s) s.style.display = 'none';
-  }
-});
+function onNombreInput() {
+  // Si escribe manualmente, limpiar el select
+  document.getElementById('fProductoSelect').value = '';
+  const val = document.getElementById('fNombre').value.trim().toLowerCase();
+  const inv = (allData.inventario||[]).find(p=>String(p['Nombre']||'').toLowerCase()===val);
+  if (inv) document.getElementById('fSap').value = inv['SAP']||'';
+}
 
 function onBodegaChange(){
   if(mType!=='salida')return;
