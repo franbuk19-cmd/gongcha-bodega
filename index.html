@@ -202,8 +202,8 @@ select option{background:var(--s2)}
       <div class="kpi total"><div class="kpi-n" id="kTotal">—</div><div class="kpi-l">Total Productos</div><div class="kpi-s">en sistema</div></div>
       <div class="kpi rep"><div class="kpi-n" id="kRep">—</div><div class="kpi-l">República</div><div class="kpi-s">unidades</div></div>
       <div class="kpi nay"><div class="kpi-n" id="kNay">—</div><div class="kpi-l">Nayón</div><div class="kpi-s">unidades</div></div>
-      <div class="kpi cum"><div class="kpi-n" id="kCum">—</div><div class="kpi-l">Cumbayá</div><div class="kpi-s">unidades</div></div>
-      <div class="kpi exp"><div class="kpi-n" id="kExp">—</div><div class="kpi-l">Por Vencer</div><div class="kpi-s">≤ 30 días</div></div>
+      <div class="kpi ok"><div class="kpi-n" id="kEntradas">—</div><div class="kpi-l">Entradas Hoy</div><div class="kpi-s">movimientos</div></div>
+      <div class="kpi exp"><div class="kpi-n" id="kSalidas">—</div><div class="kpi-l">Salidas Hoy</div><div class="kpi-s">movimientos</div></div>
     </div>
     <div class="tbar">
       <input class="sbox" id="invSearch" placeholder="Buscar producto..." oninput="renderInventario()">
@@ -217,10 +217,8 @@ select option{background:var(--s2)}
           <th>Producto</th>
           <th>República</th>
           <th>Nayón</th>
-          <th>Cumbayá</th>
           <th>Total</th>
-          <th>Vence</th>
-          <th>Estado</th>
+          <th>Última Actualización</th>
         </tr></thead>
         <tbody id="invBody"></tbody>
       </table>
@@ -246,6 +244,7 @@ select option{background:var(--s2)}
           <th>Tipo</th>
           <th>Producto</th>
           <th>Bodega</th>
+          <th>Destino</th>
           <th>Cantidad</th>
           <th>Responsable</th>
           <th>Nota</th>
@@ -259,7 +258,7 @@ select option{background:var(--s2)}
 
   <!-- PAGE: BODEGAS -->
   <div class="page" id="page-bodegas">
-    <div class="bodega-grid">
+    <div class="bodega-grid" style="grid-template-columns:1fr 1fr">
       <div class="bodega-card bc-rep">
         <div class="bc-header"><span class="bc-name">🏢 República</span><span class="bc-count" id="bc-rep-count">—</span></div>
         <div class="bc-body" id="bc-rep-body"><div class="bc-empty">Sin stock</div></div>
@@ -267,10 +266,6 @@ select option{background:var(--s2)}
       <div class="bodega-card bc-nay">
         <div class="bc-header"><span class="bc-name">🌿 Nayón</span><span class="bc-count" id="bc-nay-count">—</span></div>
         <div class="bc-body" id="bc-nay-body"><div class="bc-empty">Sin stock</div></div>
-      </div>
-      <div class="bodega-card bc-cum">
-        <div class="bc-header"><span class="bc-name">🏔️ Cumbayá</span><span class="bc-count" id="bc-cum-count">—</span></div>
-        <div class="bc-body" id="bc-cum-body"><div class="bc-empty">Sin stock</div></div>
       </div>
     </div>
   </div>
@@ -383,18 +378,19 @@ function renderInventario(){
   const list=(allData.inventario||[]).filter(p=>!q||String(p['Nombre']||'').toLowerCase().includes(q.toLowerCase())||String(p['SAP']||'').includes(q));
 
   // KPIs
-  let totRep=0,totNay=0,totCum=0,expCnt=0;
+  let totRep=0,totNay=0;
   (allData.inventario||[]).forEach(p=>{
     totRep+=parseInt(p['República'])||0;
     totNay+=parseInt(p['Nayón'])||0;
-    totCum+=parseInt(p['Cumbayá'])||0;
-    if(p['FechaVencimiento']){const s=vStatus(p['FechaVencimiento']);if(s.type!=='ok')expCnt++;}
   });
+  const todayStr=TODAY.toISOString().slice(0,10);
+  const entradasHoy=(allData.movimientos||[]).filter(m=>m['Tipo']==='ENTRADA'&&String(m['Timestamp']||'').slice(0,10)===todayStr).length;
+  const salidasHoy=(allData.movimientos||[]).filter(m=>m['Tipo']==='SALIDA'&&String(m['Timestamp']||'').slice(0,10)===todayStr).length;
   document.getElementById('kTotal').textContent=(allData.inventario||[]).length;
   document.getElementById('kRep').textContent=totRep;
   document.getElementById('kNay').textContent=totNay;
-  document.getElementById('kCum').textContent=totCum;
-  document.getElementById('kExp').textContent=expCnt;
+  document.getElementById('kEntradas').textContent=entradasHoy;
+  document.getElementById('kSalidas').textContent=salidasHoy;
 
   const tbody=document.getElementById('invBody');
   const empty=document.getElementById('invEmpty');
@@ -404,17 +400,14 @@ function renderInventario(){
 
   list.sort((a,b)=>String(a['Nombre']||'').localeCompare(String(b['Nombre']||'')));
   tbody.innerHTML=list.map(p=>{
-    const s=p['FechaVencimiento']?vStatus(p['FechaVencimiento']):{type:'ok',label:'Sin fecha',chip:'cg',dot:'dg'};
-    const expFmt=p['FechaVencimiento']?new Date(p['FechaVencimiento']+'T00:00:00').toLocaleDateString('es-EC',{day:'2-digit',month:'short',year:'numeric'}):'—';
-    const rep=parseInt(p['República'])||0, nay=parseInt(p['Nayón'])||0, cum=parseInt(p['Cumbayá'])||0;
+    const rep=parseInt(p['República'])||0, nay=parseInt(p['Nayón'])||0;
+    const upd=p['UltimaActualizacion']?new Date(p['UltimaActualizacion']).toLocaleDateString('es-EC',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
     return`<tr>
       <td><div class="pn">${esc(p['Nombre'])}</div><div class="ps">SAP: ${esc(p['SAP']||'—')}</div></td>
       <td><span class="qty-n">${rep}</span><div class="qty-s">uds</div></td>
       <td><span class="qty-n">${nay}</span><div class="qty-s">uds</div></td>
-      <td><span class="qty-n">${cum}</span><div class="qty-s">uds</div></td>
-      <td><span class="qty-n" style="color:var(--gold-lt)">${rep+nay+cum}</span><div class="qty-s">total</div></td>
-      <td><span style="font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)">${expFmt}</span></td>
-      <td><span class="chip ${s.chip}"><span class="dot ${s.dot}"></span>${s.label}</span></td>
+      <td><span class="qty-n" style="color:var(--gold-lt)">${rep+nay}</span><div class="qty-s">total</div></td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${upd}</span></td>
     </tr>`;
   }).join('');
 }
@@ -449,6 +442,7 @@ function renderMovimientos(){
       <td><span class="${tipoClass}">${m['Tipo']}</span></td>
       <td><div class="pn">${esc(m['Producto'])}</div><div class="ps">SAP: ${esc(m['SAP']||'—')}</div></td>
       <td><span class="stag">${esc(m['Bodega']||'—')}</span></td>
+      <td><span style="font-size:12px;color:var(--muted2)">${m['Tipo']==='SALIDA'?esc(m['Nota']||'—'):'—'}</span></td>
       <td><span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${qColor}">${signo}${m['Cantidad']}</span></td>
       <td style="font-weight:500">${esc(m['Responsable']||'—')}</td>
       <td style="color:var(--muted);font-size:12px">${esc(m['Nota']||'—')}</td>
@@ -458,8 +452,8 @@ function renderMovimientos(){
 
 // ── Render bodegas ────────────────────────────────────────────
 function renderBodegas(){
-  ['República','Nayón','Cumbayá'].forEach((b,i)=>{
-    const keys=['rep','nay','cum'];
+  ['República','Nayón'].forEach((b,i)=>{
+    const keys=['rep','nay'];
     const inv=(allData.inventario||[]).filter(p=>(parseInt(p[b])||0)>0);
     const total=inv.reduce((s,p)=>s+(parseInt(p[b])||0),0);
     document.getElementById(`bc-${keys[i]}-count`).textContent=`${total} uds`;
@@ -489,10 +483,11 @@ function openModal(tipo){
   document.getElementById('mBtn').textContent=tipo==='entrada'?'Registrar Entrada':'Registrar Salida';
   document.getElementById('mBtn').className='bsv '+tipo;
   document.querySelectorAll('.entrada-only').forEach(el=>el.style.display=tipo==='entrada'?'block':'none');
+  document.querySelectorAll('.salida-only').forEach(el=>el.style.display=tipo==='salida'?'block':'none');
   document.getElementById('merr').style.display='none';
   document.getElementById('mok').style.display='none';
   document.getElementById('stockInfo').style.display='none';
-  ['fNombre','fSap','fBodega','fCantidad','fVenc','fResp','fNota'].forEach(id=>{
+  ['fNombre','fSap','fBodega','fCantidad','fResp','fNota','fDestino'].forEach(id=>{
     const el=document.getElementById(id); if(el&&el.tagName==='SELECT')el.value=''; else if(el)el.value='';
   });
   const sel=document.getElementById('fProductoSelect'); if(sel) sel.value='';
@@ -608,7 +603,7 @@ async function submitMovimiento(){
   const cantidad=parseInt(document.getElementById('fCantidad').value)||0;
   const resp    =document.getElementById('fResp').value.trim();
   const nota    =document.getElementById('fNota').value.trim();
-  const venc    =document.getElementById('fVenc')?.value||'';
+  const destino =document.getElementById('fDestino')?.value||'';
   const merr    =document.getElementById('merr');
   const mok     =document.getElementById('mok');
 
@@ -621,7 +616,7 @@ async function submitMovimiento(){
   const btn=document.getElementById('mBtn');
   btn.disabled=true; btn.textContent='Guardando...';
 
-  const payload={action:mType,sap,nombre,bodega,cantidad,responsable:resp,nota,fechaVenc:venc};
+  const payload={action:mType,sap,nombre,bodega,cantidad,responsable:resp,nota,destino};
 
   try{
     const res=await postData(payload);
@@ -648,12 +643,11 @@ function showPage(id,tab){
 
 // ── Export ────────────────────────────────────────────────────
 function exportCSV(){
-  const rows=[['Producto','SAP','República','Nayón','Cumbayá','Total','Vencimiento','Estado']];
+  const rows=[['Producto','SAP','República','Nayón','Total','Última Actualización']];
   (allData.inventario||[]).forEach(p=>{
-    const s=p['FechaVencimiento']?vStatus(p['FechaVencimiento']):{label:'Sin fecha'};
-    rows.push([p['Nombre'],p['SAP'],p['República']||0,p['Nayón']||0,p['Cumbayá']||0,
-      (parseInt(p['República'])||0)+(parseInt(p['Nayón'])||0)+(parseInt(p['Cumbayá'])||0),
-      p['FechaVencimiento']||'',s.label]);
+    rows.push([p['Nombre'],p['SAP'],p['República']||0,p['Nayón']||0,
+      (parseInt(p['República'])||0)+(parseInt(p['Nayón'])||0),
+      p['UltimaActualizacion']||'']);
   });
   const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
   const a=document.createElement('a');
