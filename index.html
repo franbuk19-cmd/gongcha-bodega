@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSIRIS Bodega — Gong Cha Ecuador v4</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#090909;--s1:#101012;--s2:#161618;--s3:#1e1e21;--border:#252528;
+  --text:#f0f0f2;--muted:#5e5e68;--muted2:#8e8e9e;
+  --red:#ff3b3b;--red-dim:rgba(255,59,59,.08);--red-bd:rgba(255,59,59,.2);
+  --ora:#ff9f0a;--ora-dim:rgba(255,159,10,.08);--ora-bd:rgba(255,159,10,.2);
+  --grn:#30d158;--grn-dim:rgba(48,209,88,.08);--grn-bd:rgba(48,209,88,.2);
+  --blue:#0a84ff;--blue-dim:rgba(10,132,255,.08);--blue-bd:rgba(10,132,255,.2);
+  --gold:#c8943a;--gold-lt:#e8b86d;--gold-dim:rgba(200,148,58,.1);--gold-bd:rgba(200,148,58,.3);
+}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;font-size:14px}
+
+/* HEADER */
+header{background:var(--s1);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+.brand{display:flex;align-items:center;gap:12px}
+.bmark{width:40px;height:40px;background:var(--gold);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:#090909}
+.bname{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2.5px;color:var(--gold-lt)}
+.brole{font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1.5px;text-transform:uppercase}
+.hright{display:flex;align-items:center;gap:8px}
+.nbadge{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);background:var(--s2);padding:6px 12px;border-radius:6px;border:1px solid var(--border)}
+.hbtn{background:var(--s2);border:1px solid var(--border);color:var(--muted2);padding:8px 14px;border-radius:7px;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;transition:all .15s;display:flex;align-items:center;gap:5px}
+.hbtn:hover{border-color:var(--gold);color:var(--text)}
+.hbtn.primary{background:var(--gold);border-color:var(--gold);color:#090909;font-weight:700}
+.hbtn.primary:hover{background:var(--gold-lt)}
+.spin{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TABS */
+.tabs{background:var(--s1);border-bottom:1px solid var(--border);padding:0 28px;display:flex;gap:0}
+.tab{padding:13px 20px;cursor:pointer;font-size:13px;font-weight:500;color:var(--muted);border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap}
+.tab:hover{color:var(--muted2)}
+.tab.active{color:var(--gold-lt);border-bottom-color:var(--gold)}
+
+/* MAIN */
+main{padding:24px 28px;max-width:1300px;margin:0 auto}
+.page{display:none}
+.page.active{display:block}
+
+/* KPI GRID */
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:var(--s1);border:1px solid var(--border);border-radius:11px;padding:18px 20px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi.total::after{background:linear-gradient(90deg,var(--gold),var(--gold-lt))}
+.kpi.rep::after{background:var(--blue)}
+.kpi.nay::after{background:#bf5af2}
+.kpi.cum::after{background:#32ade6}
+.kpi.exp::after{background:var(--red)}
+.kpi-n{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;color:var(--text)}
+.kpi.exp .kpi-n{color:var(--red)}
+.kpi-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-top:3px}
+.kpi-s{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* BODEGA CARDS */
+.bodega-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.bodega-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.bc-header{padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.bc-name{font-weight:700;font-size:14px}
+.bc-count{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted)}
+.bc-rep{border-top:3px solid var(--blue)}
+.bc-nay{border-top:3px solid #bf5af2}
+.bc-cum{border-top:3px solid #32ade6}
+.bc-body{padding:12px 18px}
+.bc-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
+.bc-row:last-child{border-bottom:none}
+.bc-prod{font-size:13px;font-weight:500}
+.bc-sap{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:1px}
+.bc-qty{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--text)}
+.bc-unit{font-size:10px;color:var(--muted);text-align:right}
+.bc-empty{text-align:center;padding:20px;color:var(--muted);font-size:12px}
+
+/* TABLE */
+.tbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.pill{background:var(--s2);border:1px solid var(--border);color:var(--muted);padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:500;transition:all .15s;white-space:nowrap}
+.pill:hover{border-color:var(--gold);color:var(--text)}
+.pill.active{background:var(--gold);border-color:var(--gold);color:#090909;font-weight:700}
+.spacer{flex:1}
+.sbox{background:var(--s2);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:180px}
+.sbox:focus{border-color:var(--gold)}
+.sbox::placeholder{color:var(--muted)}
+.sec{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+.twrap{background:var(--s1);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:24px}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--s2)}
+th{padding:10px 14px;text-align:left;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;font-family:'DM Mono',monospace;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer}
+th:hover{color:var(--muted2)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:rgba(200,148,58,.03)}
+.pn{font-weight:600;font-size:13px}
+.ps{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px}
+.qty-n{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1}
+.qty-s{font-size:10px;color:var(--muted)}
+.stag{background:var(--s3);border:1px solid var(--border);color:var(--muted2);padding:2px 8px;border-radius:4px;font-size:11px;font-family:'DM Mono',monospace;white-space:nowrap;margin:2px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap}
+.cr{background:var(--red-dim);color:var(--red);border:1px solid var(--red-bd)}
+.co{background:var(--ora-dim);color:var(--ora);border:1px solid var(--ora-bd)}
+.cg{background:var(--grn-dim);color:var(--grn);border:1px solid var(--grn-bd)}
+.cb{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-bd)}
+.dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dr{background:var(--red)}
+.do{background:var(--ora);animation:bl 1.5s infinite}
+.dg{background:var(--grn)}
+.db{background:var(--blue)}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.3}}
+.tipo-in{background:var(--grn-dim);color:var(--grn);border:1px solid var(--grn-bd);padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace}
+.tipo-out{background:var(--red-dim);color:var(--red);border:1px solid var(--red-bd);padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace}
+.ts{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.empty{text-align:center;padding:48px;color:var(--muted)}
+.loading{text-align:center;padding:40px;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(6px);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:28px;width:480px;max-width:95vw;transform:translateY(16px);transition:transform .2s}
+.overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1.5px;margin-bottom:6px}
+.modal-title.entrada{color:var(--grn)}
+.modal-title.salida{color:var(--red)}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:22px}
+.fg{margin-bottom:14px}
+label{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-bottom:5px;font-family:'DM Mono',monospace}
+input,select,textarea{width:100%;background:var(--s2);border:1.5px solid var(--border);color:var(--text);padding:10px 13px;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+select option{background:var(--s2)}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mact{display:flex;gap:10px;margin-top:20px}
+.bcl{flex:1;background:var(--s2);border:1px solid var(--border);color:var(--muted);padding:11px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px}
+.bcl:hover{color:var(--text)}
+.bsv{flex:2;border:none;padding:11px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700}
+.bsv.entrada{background:var(--grn);color:#090909}
+.bsv.salida{background:var(--red);color:#fff}
+.bsv:hover{opacity:.9}
+.bsv:disabled{background:var(--s3);color:var(--muted);cursor:not-allowed}
+.merr{color:var(--red);font-size:12px;margin-top:8px;display:none}
+.mok{color:var(--grn);font-size:12px;margin-top:8px;display:none}
+.stock-info{background:var(--s3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted2);margin-top:8px;display:none}
+
+/* SETUP */
+.setup-bar{background:var(--gold-dim);border:1px solid var(--gold-bd);border-radius:10px;padding:16px 20px;margin-bottom:20px}
+.setup-bar.hidden{display:none}
+.setup-row{display:flex;gap:8px;margin-top:8px}
+.setup-in{flex:1;background:var(--s2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:8px;font-family:'DM Mono',monospace;font-size:12px;outline:none}
+.setup-in:focus{border-color:var(--gold)}
+.setup-sv{background:var(--gold);border:none;color:#090909;padding:9px 16px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;white-space:nowrap}
+
+@media(max-width:900px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .bodega-grid{grid-template-columns:1fr}
+  main{padding:16px}
+  header{padding:12px 16px}
+  .tabs{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="bmark">GC</div>
+    <div>
+      <div class="bname">GONG CHA ECUADOR</div>
+      <div class="brole">OSIRIS — Gestión de Bodegas</div>
+    </div>
+  </div>
+  <div class="hright">
+    <div class="nbadge" id="nowLabel">—</div>
+    <button class="hbtn" onclick="loadData()"><span id="rico">↻</span> Actualizar</button>
+    <button class="hbtn primary" onclick="openModal('entrada')">+ Entrada</button>
+    <button class="hbtn" style="border-color:var(--red-bd);color:var(--red)" onclick="openModal('salida')">− Salida</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showPage('inventario',this)">📦 Inventario</div>
+  <div class="tab" onclick="showPage('movimientos',this)">📋 Movimientos</div>
+  <div class="tab" onclick="showPage('bodegas',this)">🏭 Por Bodega</div>
+</div>
+
+<main>
+  <!-- SETUP -->
+  <div class="setup-bar hidden" id="setupBar">
+    <div style="font-weight:700;color:var(--gold-lt);margin-bottom:4px">⚙️ Conectar con Google Sheets</div>
+    <div style="font-size:12px;color:var(--muted)">Pega la URL de tu Apps Script (termina en /exec)</div>
+    <div class="setup-row">
+      <input class="setup-in" id="apiIn" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+      <button class="setup-sv" onclick="saveUrl()">Guardar</button>
+    </div>
+  </div>
+
+  <!-- PAGE: INVENTARIO -->
+  <div class="page active" id="page-inventario">
+    <div class="kpis">
+      <div class="kpi total"><div class="kpi-n" id="kTotal">—</div><div class="kpi-l">Total Productos</div><div class="kpi-s">en sistema</div></div>
+      <div class="kpi rep"><div class="kpi-n" id="kRep">—</div><div class="kpi-l">República</div><div class="kpi-s">unidades</div></div>
+      <div class="kpi nay"><div class="kpi-n" id="kNay">—</div><div class="kpi-l">Nayón</div><div class="kpi-s">unidades</div></div>
+      <div class="kpi ok"><div class="kpi-n" id="kEntradas">—</div><div class="kpi-l">Entradas Hoy</div><div class="kpi-s">movimientos</div></div>
+      <div class="kpi exp"><div class="kpi-n" id="kSalidas">—</div><div class="kpi-l">Salidas Hoy</div><div class="kpi-s">movimientos</div></div>
+    </div>
+    <div class="tbar">
+      <input class="sbox" id="invSearch" placeholder="Buscar producto..." oninput="renderInventario()">
+      <div class="spacer"></div>
+      <button class="hbtn" onclick="exportCSV()">⬇ CSV</button>
+    </div>
+    <div class="sec">Inventario consolidado</div>
+    <div class="twrap">
+      <table>
+        <thead><tr>
+          <th>Producto</th>
+          <th>República</th>
+          <th>Nayón</th>
+          <th>Total</th>
+          <th>Última Actualización</th>
+        </tr></thead>
+        <tbody id="invBody"></tbody>
+      </table>
+      <div class="empty" id="invEmpty" style="display:none">Sin productos registrados</div>
+      <div class="loading" id="invLoading">Cargando inventario...</div>
+    </div>
+  </div>
+
+  <!-- PAGE: MOVIMIENTOS -->
+  <div class="page" id="page-movimientos">
+    <div class="tbar">
+      <button class="pill active" onclick="setMFilter('all',this)">Todos</button>
+      <button class="pill" onclick="setMFilter('ENTRADA',this)">🟢 Entradas</button>
+      <button class="pill" onclick="setMFilter('SALIDA',this)">🔴 Salidas</button>
+      <div class="spacer"></div>
+      <input class="sbox" id="movSearch" placeholder="Buscar..." oninput="renderMovimientos()">
+    </div>
+    <div class="sec">Historial de movimientos</div>
+    <div class="twrap">
+      <table>
+        <thead><tr>
+          <th>Fecha / Hora</th>
+          <th>Tipo</th>
+          <th>Producto</th>
+          <th>Bodega</th>
+          <th>Destino</th>
+          <th>Cantidad</th>
+          <th>Responsable</th>
+          <th>Nota</th>
+        </tr></thead>
+        <tbody id="movBody"></tbody>
+      </table>
+      <div class="empty" id="movEmpty" style="display:none">Sin movimientos registrados</div>
+      <div class="loading" id="movLoading">Cargando movimientos...</div>
+    </div>
+  </div>
+
+  <!-- PAGE: BODEGAS -->
+  <div class="page" id="page-bodegas">
+    <div class="bodega-grid" style="grid-template-columns:1fr 1fr">
+      <div class="bodega-card bc-rep">
+        <div class="bc-header"><span class="bc-name">🏢 República</span><span class="bc-count" id="bc-rep-count">—</span></div>
+        <div class="bc-body" id="bc-rep-body"><div class="bc-empty">Sin stock</div></div>
+      </div>
+      <div class="bodega-card bc-nay">
+        <div class="bc-header"><span class="bc-name">🌿 Nayón</span><span class="bc-count" id="bc-nay-count">—</span></div>
+        <div class="bc-body" id="bc-nay-body"><div class="bc-empty">Sin stock</div></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- MODAL ENTRADA / SALIDA -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">ENTRADA</div>
+    <div class="modal-sub" id="modalSub">Registrar llegada de producto</div>
+    <div class="fg">
+      <label>Producto *</label>
+      <select id="fProductoSelect" onchange="onProductoSelect()" style="margin-bottom:8px">
+        <option value="">— Selecciona producto —</option>
+      </select>
+      <input id="fNombre" type="text" placeholder="O escribe nombre personalizado..." oninput="onNombreInput()" autocomplete="off" style="margin-top:0">
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Código SAP</label><input id="fSap" type="text" placeholder="1000000780"></div>
+      <div class="fg"><label>Bodega *</label>
+        <select id="fBodega" onchange="onBodegaChange()">
+          <option value="">Selecciona bodega</option>
+          <option>República</option>
+          <option>Nayón</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Cantidad (cajas/unidades) *</label>
+      <input id="fCantidad" type="number" min="1" placeholder="12">
+      <div class="stock-info" id="stockInfo"></div>
+    </div>
+
+    <div class="fg" id="destinoField" style="display:none">
+      <label>Tienda Destino *</label>
+      <select id="fDestino">
+        <option value="">— ¿A qué tienda va? —</option>
+        <option>Tienda República del Salvador</option>
+        <option>Tienda Paseo San Francisco</option>
+        <option>Tienda Quicentro</option>
+        <option>Tienda El Jardín</option>
+        <option>Tienda Condado</option>
+        <option>Tienda Scala</option>
+        <option>Otro</option>
+      </select>
+    </div>
+    <div class="fr2">
+      <div class="fg"><label>Responsable *</label><input id="fResp" type="text" placeholder="Tu nombre"></div>
+      <div class="fg"><label>Nota (opcional)</label><input id="fNota" type="text" placeholder="Lote, observación..."></div>
+    </div>
+    <div class="merr" id="merr"></div>
+    <div class="mok" id="mok"></div>
+    <div class="mact">
+      <button class="bcl" onclick="closeModal()">Cancelar</button>
+      <button class="bsv entrada" id="mBtn" onclick="submitMovimiento()">Registrar Entrada</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Estado ────────────────────────────────────────────────────
+const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+let API_URL  = localStorage.getItem('gc_bodega_url') || '';
+let allData  = { inventario: [], movimientos: [], productos: [] };
+let mFilter  = 'all';
+let mType    = 'entrada';
+let cbCount  = 0;
+
+// Fecha
+const DN=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+document.getElementById('nowLabel').textContent=`${DN[TODAY.getDay()]} ${TODAY.getDate()} ${MN[TODAY.getMonth()]} ${TODAY.getFullYear()}`;
+
+// ── URL setup ─────────────────────────────────────────────────
+function saveUrl(){
+  const u=document.getElementById('apiIn').value.trim();
+  if(!u||!u.includes('script.google.com')){alert('URL inválida');return;}
+  API_URL=u; localStorage.setItem('gc_bodega_url',u);
+  document.getElementById('setupBar').classList.add('hidden');
+  loadData();
+}
+
+// ── JSONP ─────────────────────────────────────────────────────
+function jsonp(url){
+  return new Promise((res,rej)=>{
+    const cb='__cb_'+(++cbCount);
+    const s=document.createElement('script');
+    const t=setTimeout(()=>{cleanup();rej(new Error('timeout'))},12000);
+    window[cb]=d=>{cleanup();res(d);};
+    function cleanup(){clearTimeout(t);delete window[cb];if(s.parentNode)s.parentNode.removeChild(s);}
+    s.onerror=()=>{cleanup();rej(new Error('error'));};
+    s.src=url+(url.includes('?')?'&':'?')+'callback='+cb+'&t='+Date.now();
+    document.head.appendChild(s);
+  });
+}
+
+async function postData(payload){
+  return fetch(API_URL,{method:'POST',body:JSON.stringify(payload)})
+    .then(r=>r.json()).catch(()=>({error:'Error de red'}));
+}
+
+// ── Cargar datos ──────────────────────────────────────────────
+async function loadData(){
+  if(!API_URL){
+    document.getElementById('setupBar').classList.remove('hidden');
+    ['invLoading','movLoading'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='Configura la URL para comenzar.';});
+    return;
+  }
+  const ico=document.getElementById('rico'); ico.classList.add('spin');
+  ['invLoading','movLoading'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='block';el.textContent='Cargando...';}});
+  try{
+    const d=await jsonp(API_URL+'?action=getAll');
+    allData=d;
+    renderInventario();
+    renderMovimientos();
+    renderBodegas();
+    ['invLoading','movLoading'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  }catch(e){
+    console.error(e);
+    ['invLoading','movLoading'].forEach(id=>{const el=document.getElementById(id);if(el){el.style.display='block';el.textContent='❌ Error al conectar. Verifica la URL del Apps Script.';}});
+    document.getElementById('setupBar').classList.remove('hidden');
+  }
+  ico.classList.remove('spin');
+}
+
+// ── Render inventario ─────────────────────────────────────────
+function renderInventario(){
+  const q=(document.getElementById('invSearch')||{}).value||'';
+  const list=(allData.inventario||[]).filter(p=>!q||String(p['Nombre']||'').toLowerCase().includes(q.toLowerCase())||String(p['SAP']||'').includes(q));
+
+  // KPIs
+  let totRep=0,totNay=0;
+  (allData.inventario||[]).forEach(p=>{
+    totRep+=parseInt(p['República'])||0;
+    totNay+=parseInt(p['Nayón'])||0;
+  });
+  const todayStr=TODAY.toISOString().slice(0,10);
+  const entradasHoy=(allData.movimientos||[]).filter(m=>m['Tipo']==='ENTRADA'&&String(m['Timestamp']||'').slice(0,10)===todayStr).length;
+  const salidasHoy=(allData.movimientos||[]).filter(m=>m['Tipo']==='SALIDA'&&String(m['Timestamp']||'').slice(0,10)===todayStr).length;
+  document.getElementById('kTotal').textContent=(allData.inventario||[]).length;
+  document.getElementById('kRep').textContent=totRep;
+  document.getElementById('kNay').textContent=totNay;
+  document.getElementById('kEntradas').textContent=entradasHoy;
+  document.getElementById('kSalidas').textContent=salidasHoy;
+
+  const tbody=document.getElementById('invBody');
+  const empty=document.getElementById('invEmpty');
+  document.getElementById('invLoading').style.display='none';
+  if(!list.length){empty.style.display='block';tbody.innerHTML='';return;}
+  empty.style.display='none';
+
+  list.sort((a,b)=>String(a['Nombre']||'').localeCompare(String(b['Nombre']||'')));
+  tbody.innerHTML=list.map(p=>{
+    const rep=parseInt(p['República'])||0, nay=parseInt(p['Nayón'])||0;
+    const upd=p['UltimaActualizacion']?new Date(p['UltimaActualizacion']).toLocaleDateString('es-EC',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    return`<tr>
+      <td><div class="pn">${esc(p['Nombre'])}</div><div class="ps">SAP: ${esc(p['SAP']||'—')}</div></td>
+      <td><span class="qty-n">${rep}</span><div class="qty-s">uds</div></td>
+      <td><span class="qty-n">${nay}</span><div class="qty-s">uds</div></td>
+      <td><span class="qty-n" style="color:var(--gold-lt)">${rep+nay}</span><div class="qty-s">total</div></td>
+      <td><span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)">${upd}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Render movimientos ────────────────────────────────────────
+function setMFilter(f,btn){
+  mFilter=f;
+  document.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMovimientos();
+}
+
+function renderMovimientos(){
+  const q=(document.getElementById('movSearch')||{}).value||'';
+  let list=(allData.movimientos||[]).filter(m=>{
+    if(mFilter!=='all'&&m['Tipo']!==mFilter)return false;
+    if(q&&!String(m['Producto']||'').toLowerCase().includes(q.toLowerCase())&&!String(m['Responsable']||'').toLowerCase().includes(q.toLowerCase()))return false;
+    return true;
+  });
+  const tbody=document.getElementById('movBody');
+  const empty=document.getElementById('movEmpty');
+  document.getElementById('movLoading').style.display='none';
+  if(!list.length){empty.style.display='block';tbody.innerHTML='';return;}
+  empty.style.display='none';
+  tbody.innerHTML=list.map(m=>{
+    const ts=m['Timestamp']?new Date(m['Timestamp']).toLocaleString('es-EC',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    const tipoClass=m['Tipo']==='ENTRADA'?'tipo-in':'tipo-out';
+    const signo=m['Tipo']==='ENTRADA'?'+':'-';
+    const qColor=m['Tipo']==='ENTRADA'?'var(--grn)':'var(--red)';
+    return`<tr>
+      <td><span class="ts">${ts}</span></td>
+      <td><span class="${tipoClass}">${m['Tipo']}</span></td>
+      <td><div class="pn">${esc(m['Producto'])}</div><div class="ps">SAP: ${esc(m['SAP']||'—')}</div></td>
+      <td><span class="stag">${esc(m['Bodega']||'—')}</span></td>
+      <td><span style="font-size:12px;color:var(--muted2)">${m['Tipo']==='SALIDA'?esc(m['Nota']||'—'):'—'}</span></td>
+      <td><span style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:${qColor}">${signo}${m['Cantidad']}</span></td>
+      <td style="font-weight:500">${esc(m['Responsable']||'—')}</td>
+      <td style="color:var(--muted);font-size:12px">${esc(m['Nota']||'—')}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Render bodegas ────────────────────────────────────────────
+function renderBodegas(){
+  ['República','Nayón'].forEach((b,i)=>{
+    const keys=['rep','nay'];
+    const inv=(allData.inventario||[]).filter(p=>(parseInt(p[b])||0)>0);
+    const total=inv.reduce((s,p)=>s+(parseInt(p[b])||0),0);
+    document.getElementById(`bc-${keys[i]}-count`).textContent=`${total} uds`;
+    const body=document.getElementById(`bc-${keys[i]}-body`);
+    if(!inv.length){body.innerHTML='<div class="bc-empty">Sin stock</div>';return;}
+    body.innerHTML=inv.map(p=>`<div class="bc-row">
+      <div><div class="bc-prod">${esc(p['Nombre'])}</div><div class="bc-sap">SAP: ${esc(p['SAP']||'—')}</div></div>
+      <div style="text-align:right"><div class="bc-qty">${parseInt(p[b])||0}</div><div class="bc-unit">uds</div></div>
+    </div>`).join('');
+  });
+}
+
+// ── Status vencimiento ────────────────────────────────────────
+function vStatus(exp){
+  const d=new Date(exp+'T00:00:00'), diff=Math.round((d-TODAY)/86400000);
+  if(diff<0)  return{type:'expired',label:`Venció hace ${Math.abs(diff)}d`,chip:'cr',dot:'dr'};
+  if(diff<=30)return{type:'warning',label:`${diff}d restantes`,chip:'co',dot:'do'};
+  return          {type:'ok',      label:`${diff}d restantes`,chip:'cg',dot:'dg'};
+}
+
+// ── Modal ─────────────────────────────────────────────────────
+function openModal(tipo){
+  mType=tipo;
+  document.getElementById('modalTitle').textContent=tipo==='entrada'?'REGISTRAR ENTRADA':'REGISTRAR SALIDA';
+  document.getElementById('modalTitle').className='modal-title '+tipo;
+  document.getElementById('modalSub').textContent=tipo==='entrada'?'Llegada de producto de Taiwan / proveedor':'Retiro de producto de bodega';
+  document.getElementById('mBtn').textContent=tipo==='entrada'?'Registrar Entrada':'Registrar Salida';
+  document.getElementById('mBtn').className='bsv '+tipo;
+  document.querySelectorAll('.entrada-only').forEach(el=>el.style.display=tipo==='entrada'?'block':'none');
+  document.querySelectorAll('.salida-only').forEach(el=>el.style.display=tipo==='salida'?'block':'none');
+  const df=document.getElementById('destinoField');if(df)df.style.display=tipo==='salida'?'block':'none';
+  document.getElementById('merr').style.display='none';
+  document.getElementById('mok').style.display='none';
+  document.getElementById('stockInfo').style.display='none';
+  ['fNombre','fSap','fBodega','fCantidad','fResp','fNota'].forEach(id=>{
+    const el=document.getElementById(id); if(el&&el.tagName==='SELECT')el.value=''; else if(el)el.value='';
+  });
+  const sel=document.getElementById('fProductoSelect'); if(sel) sel.value='';
+  const fd=document.getElementById('fDestino'); if(fd) fd.value='';
+  document.getElementById('overlay').classList.add('open');
+  buildProductoSelect();
+  setTimeout(()=>document.getElementById('fProductoSelect').focus(),100);
+}
+
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+function overlayClick(e){if(e.target===e.currentTarget)closeModal();}
+
+// ── Catálogo de productos Gong Cha ────────────────────────────
+const CATALOGO = [
+  { nombre: 'PCP',                  sap: 'A001' },
+  { nombre: 'Brown Sugar Syrup',    sap: 'A002' },
+  { nombre: 'Maracuyá Syrup',       sap: 'A003' },
+  { nombre: 'Fresa Syrup',          sap: 'A004' },
+  { nombre: 'Durazno Syrup',        sap: 'A005' },
+  { nombre: 'Mango Syrup',          sap: 'A006' },
+  { nombre: 'Té Oolong',            sap: 'A007' },
+  { nombre: 'Té Verde',             sap: 'A008' },
+  { nombre: 'Té Negro',             sap: 'A009' },
+  { nombre: 'House Special',        sap: 'A010' },
+  { nombre: 'Leche Entera',         sap: 'A011' },
+  { nombre: 'Leche Deslactosada',   sap: 'A012' },
+  { nombre: 'Coconut Jelly',        sap: 'A013' },
+  { nombre: 'Star Jelly',           sap: 'A014' },
+  { nombre: 'Fresa Kanten',         sap: 'A015' },
+  { nombre: 'Mango Kanten',         sap: 'A016' },
+  { nombre: 'Perlas',               sap: 'A017' },
+  { nombre: 'Pudding',              sap: 'A018' },
+  { nombre: 'Syrup',                sap: 'A019' },
+  { nombre: 'Taro',                 sap: 'A020' },
+  { nombre: 'Matcha',               sap: 'A021' },
+  { nombre: 'Café',                 sap: 'A022' },
+  { nombre: 'Crema de Leche',       sap: 'A023' },
+  { nombre: 'Mantequilla',          sap: 'A024' },
+  { nombre: 'Leche Condensada',     sap: 'A025' },
+  { nombre: 'Azúcar Morena 1kg',    sap: 'A026' },
+  { nombre: 'Azúcar Morena 5kg',    sap: 'A027' },
+  { nombre: 'Tapa Plana',           sap: 'A028' },
+  { nombre: 'Tapa Domo',            sap: 'A029' },
+  { nombre: 'Tapa Roja',            sap: 'A030' },
+  { nombre: 'Sorbetes',             sap: 'A031' },
+  { nombre: 'Vasos Mediano',        sap: 'A032' },
+  { nombre: 'Vasos Largos',         sap: 'A033' },
+  { nombre: 'Vasos Calientes',      sap: 'A034' },
+  { nombre: 'Portavasos',           sap: 'A035' },
+  { nombre: 'Fundas Pequeñas',      sap: 'A036' },
+  { nombre: 'Fundas Grandes',       sap: 'A037' },
+  { nombre: 'Llavero Morado',       sap: 'A038' },
+  { nombre: 'Llavero Verde',        sap: 'A039' },
+  { nombre: 'Pines',                sap: 'A040' },
+  { nombre: 'Peluches',             sap: 'A041' },
+  { nombre: 'Tomatodo Grande',      sap: 'A042' },
+  { nombre: 'Tomatodo Pequeño',     sap: 'A043' },
+  { nombre: 'Oreo',                 sap: 'A044' },
+];
+
+function buildProductoSelect() {
+  const sel = document.getElementById('fProductoSelect');
+  if (!sel) return;
+  // Combinar catálogo + inventario existente
+  const invItems = (allData.inventario||[]).map(p=>({nombre:p['Nombre']||'',sap:p['SAP']||''}));
+  const all = [...CATALOGO];
+  invItems.forEach(i=>{ if(!all.find(c=>c.sap===i.sap)) all.push(i); });
+  all.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  sel.innerHTML = '<option value="">— Selecciona producto —</option>' +
+    all.map(p=>`<option value="${p.sap}" data-nombre="${p.nombre}">${p.nombre} (${p.sap})</option>`).join('');
+}
+
+function onProductoSelect() {
+  const sel = document.getElementById('fProductoSelect');
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt.value) return;
+  document.getElementById('fNombre').value = opt.getAttribute('data-nombre');
+  document.getElementById('fSap').value = opt.value;
+  if (mType === 'salida') onBodegaChange();
+}
+
+function onNombreInput() {
+  // Si escribe manualmente, limpiar el select
+  document.getElementById('fProductoSelect').value = '';
+  const val = document.getElementById('fNombre').value.trim().toLowerCase();
+  const inv = (allData.inventario||[]).find(p=>String(p['Nombre']||'').toLowerCase()===val);
+  if (inv) document.getElementById('fSap').value = inv['SAP']||'';
+}
+
+function onBodegaChange(){
+  if(mType!=='salida')return;
+  const sap=document.getElementById('fSap').value.trim();
+  const bod=document.getElementById('fBodega').value;
+  if(!sap||!bod)return;
+  const prod=(allData.inventario||[]).find(p=>String(p['SAP'])===sap);
+  if(prod){
+    const qty=parseInt(prod[bod])||0;
+    const si=document.getElementById('stockInfo');
+    si.style.display='block';
+    si.textContent=`Stock actual en ${bod}: ${qty} unidades`;
+  }
+}
+
+function onNombreInput(){
+  const val=document.getElementById('fNombre').value.trim().toLowerCase();
+  const match=(allData.inventario||[]).find(p=>String(p['Nombre']||'').toLowerCase()===val);
+  if(match&&!document.getElementById('fSap').value)document.getElementById('fSap').value=match['SAP']||'';
+}
+
+async function submitMovimiento(){
+  const nombre  =document.getElementById('fNombre').value.trim();
+  const sap     =document.getElementById('fSap').value.trim();
+  const bodega  =document.getElementById('fBodega').value;
+  const cantidad=parseInt(document.getElementById('fCantidad').value)||0;
+  const resp    =document.getElementById('fResp').value.trim();
+  const nota    =document.getElementById('fNota').value.trim();
+  const destino =document.getElementById('fDestino')?.value||'';
+  const merr    =document.getElementById('merr');
+  const mok     =document.getElementById('mok');
+
+  merr.style.display='none'; mok.style.display='none';
+  if(!nombre||!bodega||cantidad<=0||!resp){
+    merr.textContent='Completa: producto, bodega, cantidad y responsable.';
+    merr.style.display='block'; return;
+  }
+
+  const btn=document.getElementById('mBtn');
+  btn.disabled=true; btn.textContent='Guardando...';
+
+  const payload={action:mType,sap,nombre,bodega,cantidad,responsable:resp,nota,destino};
+
+  try{
+    const res=await postData(payload);
+    if(res.error){
+      merr.textContent=res.error; merr.style.display='block';
+    } else {
+      mok.textContent=mType==='entrada'?`✓ Entrada registrada (ID: ${res.id})`:`✓ Salida registrada. Stock restante en ${bodega}: ${res.stockRestante} uds`;
+      mok.style.display='block';
+      setTimeout(()=>{closeModal();loadData();},1800);
+    }
+  }catch(e){
+    merr.textContent='Error de conexión. Intenta de nuevo.'; merr.style.display='block';
+  }
+  btn.disabled=false; btn.textContent=mType==='entrada'?'Registrar Entrada':'Registrar Salida';
+}
+
+// ── Navegación ────────────────────────────────────────────────
+function showPage(id,tab){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+}
+
+// ── Export ────────────────────────────────────────────────────
+function exportCSV(){
+  const rows=[['Producto','SAP','República','Nayón','Total','Última Actualización']];
+  (allData.inventario||[]).forEach(p=>{
+    rows.push([p['Nombre'],p['SAP'],p['República']||0,p['Nayón']||0,
+      (parseInt(p['República'])||0)+(parseInt(p['Nayón'])||0),
+      p['UltimaActualizacion']||'']);
+  });
+  const csv=rows.map(r=>r.map(c=>`"${c}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download=`gongcha_bodega_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+
+// Auto-refresh cada 5 min
+setInterval(loadData,300000);
+
+// Init
+if(!API_URL){
+  document.getElementById('setupBar').classList.remove('hidden');
+  ['invLoading','movLoading'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='Configura la URL para comenzar.';});
+} else { loadData(); }
+</script>
+</body>
+</html>
